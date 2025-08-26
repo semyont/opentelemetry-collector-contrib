@@ -1,0 +1,60 @@
+type: compression
+
+stability:
+  development: [traces]
+
+status:
+  class: processor
+  stability:
+    development: [traces]
+  distributions: [contrib]
+  codeowners:
+    active: [semyont]
+
+config:
+  # List of attribute keys whose string values should be compressed.
+  # Environment variable substitution can be used, e.g., attributes: ["${ATTR1}", "${ATTR2}"]
+  attributes: ["db.statement", "http.request.body", "custom.large.payload", "gen_ai.prompt.1.content"]
+  # Compression algorithm to use.
+  # Options: "lz4", "zstd", "snappy", "gzip", "zlib", "deflate", "none"
+  # Default: "lz4"
+  # Can be set via environment variable, e.g., compression: "${COMPRESSION_ALG:lz4}"
+  compression: .zstd.base64
+
+  # Encoding for the compressed bytes.
+  # Options: "base64" (Default), "base85", "base91"
+  # Can be set via environment variable, e.g., encoding: "${COMPRESSION_ENCODING:base64}"
+  encoding: base64
+
+  # Optional algorithm-specific compression parameters.
+  compression_params:
+    # Level for zstd (e.g., 1=Fastest, 3=Default, 6=Better, 11=Best).
+    # Valid ranges differ per algorithm (e.g., gzip/zlib/deflate: -1 to 9).
+    # 0 or unset usually implies library default.
+    # Can be set via environment variable, e.g., level: ${COMPRESSION_LEVEL:3}
+    level: 6 # zstd SpeedBetterCompression
+
+  # Minimum length (in bytes) a string attribute must have to be compressed.
+  # Attributes shorter than this are skipped. Default: 16. Set to 0 to disable.
+  # Can be set via environment variable, e.g., min_length: ${COMPRESSION_MIN_LENGTH:16}
+  min_length: 16
+
+  # Maximum time allowed for a single compression operation. Use Go duration format (e.g., "50ms", "1s").
+  # If exceeded, the operation is aborted. Default: "100ms". Set to "0" to disable.
+  # Can be set via environment variable, e.g., compression_timeout: ${COMPRESSION_TIMEOUT:"100ms"}
+  compression_timeout: 100ms
+
+  # Suffix to append to the original attribute key for the compressed value.
+  # Default: "_compressed". Must not be empty.
+  # Can be set via environment variable, e.g., compressed_suffix: ${COMPRESSION_SUFFIX:"_compressed"}
+  compressed_suffix: ".zstd.base64"
+
+  # Compress attributes within span events if their keys match the 'attributes' list.
+  # Default: false
+  # Can be set via environment variable, e.g., compress_span_events: ${COMPRESS_SPAN_EVENTS:false}
+  compress_span_events: false
+
+  # Enable debug logging for original vs. compressed sizes.
+  # Default: false
+  # Can be set via environment variable, e.g., debug: ${COMPRESSION_DEBUG:false}
+  debug: true

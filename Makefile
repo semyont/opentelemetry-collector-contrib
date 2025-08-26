@@ -688,3 +688,32 @@ checks:
 	$(MAKE) -j4 generate
 	$(MAKE) multimod-verify
 	git diff --exit-code || (echo 'Some files need committing' && git status && exit 1)
+
+.PHONY: check-compression-processor
+check-compression-processor:
+	@echo "Checking if compression processor is included in the build..."
+	@if grep -q "compressionprocessor" cmd/otelcontribcol/builder-config.yaml; then \
+		echo "✅ Compression processor is included in builder-config.yaml"; \
+	else \
+		echo "❌ Compression processor not found in builder-config.yaml"; \
+		echo "    Run 'bash add-compression-processor.sh' to add it"; \
+	fi
+	@if [ -f ./bin/otelcontribcol_$(GOOS)_$(GOARCH) ]; then \
+		if strings ./bin/otelcontribcol_$(GOOS)_$(GOARCH) | grep -q "compressionprocessor"; then \
+			echo "✅ Compression processor is included in the built binary"; \
+		else \
+			echo "❌ Compression processor not found in the built binary"; \
+			echo "    You need to rebuild after adding it to the config"; \
+		fi; \
+	else \
+		echo "Binary not found. Run 'make otelcontribcol' first."; \
+	fi
+
+.PHONY: add-compression-processor
+add-compression-processor:
+	@bash add-compression-processor.sh
+
+.PHONY: run-compression-demo
+run-compression-demo: check-compression-processor docker-otelcontribcol
+	@echo "Starting compression processor demo with docker-compose"
+	docker compose up --build

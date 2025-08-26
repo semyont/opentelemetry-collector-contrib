@@ -1,0 +1,48 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+        include_metadata: true
+      http:
+        endpoint: 0.0.0.0:4318
+
+
+processors:
+  batch: # Keep batch for basic processing
+    timeout: 1s
+    send_batch_size: 1024
+
+  # Apply compression to specific large attributes
+  compressionprocessor:
+    attributes:
+      - db.statement # Target the db.statement attribute
+    # Use environment variables with defaults, wrapped in quotes
+    compression: gzip # Use zstd compression by default (quoted)
+    min_length: 24
+    encoding: base64 # Use base64 encoding by default (quoted)
+    compressed_suffix: .gzip.base64 # Suffix for compressed attributes
+    debug: true # Enable processor's debug logging
+    compression_params:
+      level: 3 # Default to zstd level 3
+
+exporters:
+  otlp: # Keep otlp for sending to Jaeger eventually
+    endpoint: jaeger:4317 # Send to Jaeger container
+    tls:
+      insecure: true
+  debug: # Use debug exporter to check processor output
+    verbosity: detailed
+
+service:
+  telemetry: # Add telemetry section
+    logs:
+      level: "debug" # Set the collector's internal log level to debug
+
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [compressionprocessor, batch] # Temporarily simplified
+      # processors: [batch]
+      exporters: [otlp] # Temporarily simplified
+      # exporters: [debug]

@@ -143,7 +143,8 @@ processors:
   - gomod: github.com/open-telemetry/opentelemetry-collector-contrib/processor/transformprocessor v0.133.0
   - gomod: github.com/open-telemetry/opentelemetry-collector-contrib/processor/remotetapprocessor v0.133.0
   - gomod: github.com/open-telemetry/opentelemetry-collector-contrib/processor/datadogsemanticsprocessor v0.133.0
-
+  - gomod: github.com/open-telemetry/opentelemetry-collector-contrib/processor/compressionprocessor v0.124.0-dev
+  
 receivers:
   - gomod: go.opentelemetry.io/collector/receiver/nopreceiver v0.133.0
   - gomod: go.opentelemetry.io/collector/receiver/otlpreceiver v0.133.0
@@ -279,3 +280,4 @@ providers:
 # file before passing it to OCB, to ensure that local versions are used for all
 # Contrib modules.
 replaces:
+  - github.com/open-telemetry/opentelemetry-collector-contrib/processor/compressionprocessor => ../../processor/compressionprocessor
